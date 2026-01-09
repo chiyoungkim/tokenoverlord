@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Token, TokenTemplate, Attachment } from '../types/token';
+import { COUNTER_TYPES } from '../types/token';
 
 interface TokenStore {
   tokens: Token[];
@@ -19,7 +20,12 @@ interface TokenStore {
   untapAll: () => void;
   addCounter: (id: string) => void;
   removeCounter: (id: string) => void;
+  addCustomCounter: (id: string, counterType: string, icon?: string) => void;
+  removeCustomCounter: (id: string, counterType: string) => void;
+  setCounterAmount: (id: string, counterType: string, amount: number) => void;
+  updateCounterIcon: (id: string, counterType: string, icon: string) => void;
   clearSummoningSickness: () => void;
+  removeSummoningSickness: (id: string) => void;
   clearAll: () => void;
   duplicateToken: (id: string) => void;
   
@@ -47,9 +53,11 @@ const createTokenFromTemplate = (template: TokenTemplate): Token => ({
   abilities: template.abilities,
   imageUrl: template.imageUrl,
   isTapped: false,
-  hasSummoningSickness: true,
+  hasSummoningSickness: !template.hasHaste, // No summoning sickness if has haste
+  hasHaste: template.hasHaste || false,
   plusOneCounters: 0,
   minusOneCounters: 0,
+  counters: [], // Initialize empty counters array
   attachments: [],
   createdAt: Date.now(),
 });
@@ -185,6 +193,115 @@ export const useTokenStore = create<TokenStore>()(
         }));
       },
 
+      addCustomCounter: (id: string, counterType: string, icon?: string) => {
+        set((state) => ({
+          tokens: state.tokens.map((token) => {
+            if (token.id !== id) return token;
+            
+            const counters = token.counters || [];
+            const existingCounter = counters.find(c => c.type === counterType);
+            
+            if (existingCounter) {
+              return {
+                ...token,
+                counters: counters.map(c =>
+                  c.type === counterType ? { ...c, count: c.count + 1 } : c
+                ),
+              };
+            } else {
+              // Get default icon from COUNTER_TYPES or use provided icon
+              const defaultCounterType = COUNTER_TYPES.find(ct => ct.type === counterType);
+              const counterIcon = icon || defaultCounterType?.icon || '📍';
+              
+              return {
+                ...token,
+                counters: [...counters, { type: counterType, count: 1, icon: counterIcon }],
+              };
+            }
+          }),
+        }));
+      },
+
+      removeCustomCounter: (id: string, counterType: string) => {
+        set((state) => ({
+          tokens: state.tokens.map((token) => {
+            if (token.id !== id) return token;
+            
+            const counters = token.counters || [];
+            const existingCounter = counters.find(c => c.type === counterType);
+            
+            if (!existingCounter) return token;
+            
+            if (existingCounter.count <= 1) {
+              return {
+                ...token,
+                counters: counters.filter(c => c.type !== counterType),
+              };
+            } else {
+              return {
+                ...token,
+                counters: counters.map(c =>
+                  c.type === counterType ? { ...c, count: c.count - 1 } : c
+                ),
+              };
+            }
+          }),
+        }));
+      },
+
+      setCounterAmount: (id: string, counterType: string, amount: number) => {
+        set((state) => ({
+          tokens: state.tokens.map((token) => {
+            if (token.id !== id) return token;
+            
+            const counters = token.counters || [];
+            
+            if (amount <= 0) {
+              return {
+                ...token,
+                counters: counters.filter(c => c.type !== counterType),
+              };
+            }
+            
+            const existingCounter = counters.find(c => c.type === counterType);
+            
+            if (existingCounter) {
+              return {
+                ...token,
+                counters: counters.map(c =>
+                  c.type === counterType ? { ...c, count: amount } : c
+                ),
+              };
+            } else {
+              // Get default icon from COUNTER_TYPES
+              const defaultCounterType = COUNTER_TYPES.find(ct => ct.type === counterType);
+              const counterIcon = defaultCounterType?.icon || '📍';
+              
+              return {
+                ...token,
+                counters: [...counters, { type: counterType, count: amount, icon: counterIcon }],
+              };
+            }
+          }),
+        }));
+      },
+
+      updateCounterIcon: (id: string, counterType: string, icon: string) => {
+        set((state) => ({
+          tokens: state.tokens.map((token) => {
+            if (token.id !== id) return token;
+            
+            const counters = token.counters || [];
+            return {
+              ...token,
+              counters: counters.map(c =>
+                c.type === counterType ? { ...c, icon } : c
+              ),
+            };
+          }),
+        }));
+      },
+
       clearSummoningSickness: () => {
         set((state) => ({
           tokens: state.tokens.map((token) => ({
@@ -192,6 +309,16 @@ export const useTokenStore = create<TokenStore>()(
             hasSummoningSickness: false,
             isTapped: false, // Also untap all tokens
           })),
+        }));
+      },
+
+      removeSummoningSickness: (id: string) => {
+        set((state) => ({
+          tokens: state.tokens.map((token) =>
+            token.id === id
+              ? { ...token, hasSummoningSickness: false }
+              : token
+          ),
         }));
       },
 

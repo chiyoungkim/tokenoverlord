@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import type { Token } from '../types/token';
 import { getColorGradient, getColorBorder, isLightColor } from '../utils/colors';
 import { TokenTooltip } from './TokenTooltip';
+import { parseManaSymbols } from '../utils/manaSymbols';
 
 interface StackedTokenCardProps {
   token: Token;
@@ -10,6 +11,7 @@ interface StackedTokenCardProps {
   onClickCount: () => void;
   onTapAll: () => void;
   onUntapAll: () => void;
+  onRemoveSummoningSicknessAll: () => void;
 }
 
 export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
@@ -19,9 +21,10 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
   onClickCount,
   onTapAll,
   onUntapAll,
+  onRemoveSummoningSicknessAll,
 }) => {
   const [tooltipVisible, setTooltipVisible] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
   const tooltipTimeout = useRef<number | null>(null);
   
@@ -31,6 +34,8 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
       setTooltipPosition({
         x: rect.left + rect.width / 2,
         y: rect.top + rect.height / 2,
+        width: rect.width,
+        height: rect.height,
       });
     }
     tooltipTimeout.current = setTimeout(() => setTooltipVisible(true), 500);
@@ -68,11 +73,11 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
       {!token.isTapped && (
         <>
           <div
-            className="absolute top-1 left-1 w-full h-full rounded-lg border-2 border-gray-400 opacity-40"
+            className="absolute top-1.5 left-1.5 w-full h-full rounded-lg border-2 border-gray-400 opacity-30 shadow-md"
             style={{ background: getColorGradient(token.colors) }}
           />
           <div
-            className="absolute top-0.5 left-0.5 w-full h-full rounded-lg border-2 border-gray-400 opacity-60"
+            className="absolute top-1 left-1 w-full h-full rounded-lg border-2 border-gray-400 opacity-50 shadow-lg"
             style={{ background: getColorGradient(token.colors) }}
           />
         </>
@@ -80,7 +85,7 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
       
       {/* Main card */}
       <div
-        className={`relative w-full aspect-[2.5/3.5] rounded-lg border-2 ${getColorBorder(
+        className={`relative w-full aspect-[2.5/2] rounded-lg border-2 ${getColorBorder(
           token.colors
         )} token-card-shadow cursor-pointer transition-all hover:scale-105 ${
           token.isTapped ? 'opacity-75' : ''
@@ -123,10 +128,10 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
               e.stopPropagation();
               onTapAll();
             }}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-purple-600 hover:bg-purple-700 text-white text-xl font-bold rounded-full w-10 h-10 flex items-center justify-center shadow-lg z-20 border-2 border-white transition-colors"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-purple-600 hover:bg-purple-700 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg z-20 border-2 border-white transition-colors"
             title="Tap All"
           >
-            ⟲
+            <i className="ms ms-tap" style={{ fontSize: '20px' }} />
           </button>
         )}
 
@@ -137,35 +142,42 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
               e.stopPropagation();
               onUntapAll();
             }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-purple-500 hover:bg-purple-600 text-white text-xl font-bold rounded-full w-10 h-10 flex items-center justify-center shadow-lg z-20 border-2 border-white transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-purple-500 hover:bg-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg z-20 border-2 border-white transition-colors"
             title="Untap All"
           >
-            ↻
+            <i className="ms ms-untap" style={{ fontSize: '20px' }} />
           </button>
         )}
 
         {/* Center - Visual indicators */}
         <div className="absolute inset-0 flex items-center justify-center p-8 pt-12 pb-12">
           <div className="flex flex-col items-center gap-2">
-            {/* Summoning Sickness Badge */}
+            {/* Summoning Sickness Badge - Clickable */}
             {token.hasSummoningSickness && (
-              <div className={`${
-                useDarkText ? 'bg-yellow-600' : 'bg-yellow-500'
-              } text-white text-sm font-bold rounded-full w-12 h-12 flex flex-col items-center justify-center shadow-lg border-2 border-white summoning-sick-shimmer`}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemoveSummoningSicknessAll();
+                }}
+                className={`${
+                  useDarkText ? 'bg-yellow-600' : 'bg-yellow-500'
+                } text-white text-sm font-bold rounded-full w-12 h-12 flex flex-col items-center justify-center shadow-lg border-2 border-white summoning-sick-shimmer cursor-pointer hover:bg-yellow-600 transition-colors`}
+                title="Click to remove summoning sickness from all"
+              >
                 <div className="text-[8px] leading-tight px-1">Summoning<br/>Sickness</div>
-              </div>
+              </button>
             )}
             
             {/* +1/+1 Counter Badge - Shows for all tokens */}
             {displayPlusCounters > 0 && (
-              <div className="bg-green-600 text-white text-lg font-bold rounded-full w-12 h-12 flex items-center justify-center shadow-lg border-2 border-white">
+              <div className="bg-green-600 text-white text-lg font-bold rounded-full w-12 h-12 flex items-center justify-center shadow-xl border-2 border-white ring-2 ring-green-300">
                 +{displayPlusCounters}
               </div>
             )}
             
             {/* -1/-1 Counter Badge - Shows for all tokens */}
             {displayMinusCounters > 0 && (
-              <div className="bg-red-600 text-white text-lg font-bold rounded-full w-12 h-12 flex items-center justify-center shadow-lg border-2 border-white">
+              <div className="bg-red-600 text-white text-lg font-bold rounded-full w-12 h-12 flex items-center justify-center shadow-xl border-2 border-white ring-2 ring-red-300">
                 -{displayMinusCounters}
               </div>
             )}
@@ -173,7 +185,7 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
             {/* Abilities or Background P/T */}
             {token.abilities && !isCreature ? (
               <div className={`text-xs text-center ${useDarkText ? 'text-gray-900' : 'text-white'} bg-white bg-opacity-80 p-2 rounded max-h-full overflow-hidden break-words line-clamp-4`}>
-                {token.abilities}
+                {parseManaSymbols(token.abilities)}
               </div>
             ) : !token.abilities && (
               <div className={`text-4xl font-bold ${useDarkText ? 'text-gray-900' : 'text-white'} opacity-20`}>

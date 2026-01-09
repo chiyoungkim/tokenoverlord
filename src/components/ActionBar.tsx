@@ -1,4 +1,4 @@
-import { Hand, HandMetal, Sun, Trash2, Skull, PlusCircle, MinusCircle } from 'lucide-react';
+import { Sun, Trash2, Skull, PlusCircle, MinusCircle } from 'lucide-react';
 import { useTokenStore } from '../store/tokenStore';
 
 export const ActionBar: React.FC = () => {
@@ -51,7 +51,7 @@ export const ActionBar: React.FC = () => {
           className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors"
           disabled={tokens.length === 0}
         >
-          <Hand size={24} className="text-gray-700" />
+          <i className="ms ms-tap ms-cost" style={{ fontSize: '24px', color: '#374151' }} />
           <span className="text-xs font-medium text-gray-700">Tap All</span>
         </button>
 
@@ -60,7 +60,7 @@ export const ActionBar: React.FC = () => {
           className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors"
           disabled={tokens.length === 0}
         >
-          <HandMetal size={24} className="text-gray-700" />
+          <i className="ms ms-untap ms-cost" style={{ fontSize: '24px', color: '#374151' }} />
           <span className="text-xs font-medium text-gray-700">Untap All</span>
         </button>
 

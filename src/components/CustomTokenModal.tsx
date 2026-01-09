@@ -18,6 +18,7 @@ export const CustomTokenModal: React.FC<CustomTokenModalProps> = ({ isOpen, onCl
   const [abilities, setAbilities] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [saveAsPreset, setSaveAsPreset] = useState(false);
+  const [hasHaste, setHasHaste] = useState(false);
 
   const handleColorToggle = (color: Color) => {
     setColors((prev) =>
@@ -37,6 +38,7 @@ export const CustomTokenModal: React.FC<CustomTokenModalProps> = ({ isOpen, onCl
       toughness: toughness ? parseInt(toughness) : null,
       colors,
       abilities: abilities.trim() || undefined,
+      hasHaste: hasHaste,
     };
 
     // Save as preset if checkbox is checked
@@ -54,6 +56,7 @@ export const CustomTokenModal: React.FC<CustomTokenModalProps> = ({ isOpen, onCl
     setAbilities('');
     setQuantity(1);
     setSaveAsPreset(false);
+    setHasHaste(false);
     onClose();
   };
 
@@ -161,6 +164,19 @@ export const CustomTokenModal: React.FC<CustomTokenModalProps> = ({ isOpen, onCl
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
+        </div>
+
+        {/* Haste Checkbox */}
+        <div className="px-4 pb-2">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={hasHaste}
+              onChange={(e) => setHasHaste(e.target.checked)}
+              className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+            />
+            <span className="text-sm text-gray-700">Haste? (no summoning sickness)</span>
+          </label>
         </div>
 
         {/* Save as Preset */}

@@ -1,9 +1,10 @@
 import type { Token } from '../types/token';
+import { parseManaSymbols } from '../utils/manaSymbols';
 
 interface TokenTooltipProps {
   token: Token;
   visible: boolean;
-  position: { x: number; y: number };
+  position: { x: number; y: number; width?: number; height?: number };
 }
 
 export const TokenTooltip: React.FC<TokenTooltipProps> = ({ token, visible, position }) => {
@@ -16,6 +17,10 @@ export const TokenTooltip: React.FC<TokenTooltipProps> = ({ token, visible, posi
   const currentPower = (token.power ?? 0) + netCounters;
   const currentToughness = (token.toughness ?? 0) + netCounters;
 
+  // Use actual card dimensions if provided, otherwise fallback to default
+  const tooltipWidth = position.width || 140;
+  const tooltipHeight = position.height || 196;
+
   return (
     <div
       className="fixed z-50 pointer-events-none"
@@ -26,10 +31,10 @@ export const TokenTooltip: React.FC<TokenTooltipProps> = ({ token, visible, posi
       }}
     >
       <div 
-        className="bg-gray-900 text-white rounded-lg shadow-2xl p-3 animate-fade-in"
+        className="bg-gray-900 text-white rounded-lg shadow-2xl p-3 animate-fade-in overflow-y-auto"
         style={{ 
-          width: '140px',
-          aspectRatio: '2.5 / 3.5',
+          width: `${tooltipWidth}px`,
+          height: `${tooltipHeight}px`,
           fontSize: '0.65rem',
           display: 'flex',
           flexDirection: 'column',
@@ -69,7 +74,7 @@ export const TokenTooltip: React.FC<TokenTooltipProps> = ({ token, visible, posi
           <div className="text-[10px] mb-1 flex-1 min-h-0">
             <div className="text-gray-400 mb-0.5 text-[9px]">Abilities:</div>
             <div className="bg-gray-800 rounded p-1 text-[9px] leading-tight overflow-y-auto max-h-[60px]">
-              {token.abilities}
+              {parseManaSymbols(token.abilities)}
             </div>
           </div>
         )}
@@ -96,6 +101,21 @@ export const TokenTooltip: React.FC<TokenTooltipProps> = ({ token, visible, posi
             <div className="flex justify-between">
               <span className="text-gray-400">-1/-1 Counters:</span>
               <span className="font-semibold text-red-400">-{minusCounters}</span>
+            </div>
+          )}
+
+          {/* Custom Counters */}
+          {token.counters && token.counters.filter(c => c.count > 0).length > 0 && (
+            <div className="border-t border-gray-700 pt-1 mt-1">
+              <div className="text-gray-400 mb-0.5 text-[9px]">Other Counters:</div>
+              {token.counters
+                .filter(c => c.count > 0)
+                .map((counter, idx) => (
+                  <div key={idx} className="flex justify-between text-[9px]">
+                    <span className="text-gray-400">{counter.icon || '📍'} {counter.type}:</span>
+                    <span className="font-semibold text-purple-400">{counter.count}</span>
+                  </div>
+                ))}
             </div>
           )}
 

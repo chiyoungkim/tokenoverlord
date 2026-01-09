@@ -14,7 +14,12 @@ export const TokenGrid: React.FC = () => {
     addCounter, 
     removeCounter, 
     duplicateToken, 
-    moveToGraveyard 
+    moveToGraveyard,
+    removeSummoningSickness,
+    addCustomCounter,
+    removeCustomCounter,
+    setCounterAmount,
+    updateCounterIcon,
   } = useTokenStore();
   
   const { autoStackEnabled, minStackSize, cardSize } = useSettingsStore();
@@ -116,6 +121,11 @@ export const TokenGrid: React.FC = () => {
                 onAddCounter={() => addCounter(token.id)}
                 onRemoveCounter={() => removeCounter(token.id)}
                 onDuplicate={() => duplicateToken(token.id)}
+                onRemoveSummoningSickness={() => removeSummoningSickness(token.id)}
+                onAddCustomCounter={(type, icon) => addCustomCounter(token.id, type, icon)}
+                onRemoveCustomCounter={(type) => removeCustomCounter(token.id, type)}
+                onSetCounterAmount={(type, amt) => setCounterAmount(token.id, type, amt)}
+                onUpdateCounterIcon={(type, icon) => updateCounterIcon(token.id, type, icon)}
                 onDelete={() => {
                   console.log('TokenGrid onDelete called for:', token.name);
                   if (window.confirm(`Move ${token.name} to graveyard?`)) {
@@ -147,6 +157,12 @@ export const TokenGrid: React.FC = () => {
                     if (t.isTapped) toggleTap(t.id);
                   });
                 }}
+                onRemoveSummoningSicknessAll={() => {
+                  // Remove summoning sickness from all tokens in this group
+                  group.tokens.forEach(t => {
+                    if (t.hasSummoningSickness) removeSummoningSickness(t.id);
+                  });
+                }}
               />
             );
           }
@@ -167,6 +183,11 @@ export const TokenGrid: React.FC = () => {
           onAddCounter={addCounter}
           onRemoveCounter={removeCounter}
           onDuplicate={duplicateToken}
+          onRemoveSummoningSickness={removeSummoningSickness}
+          onAddCustomCounter={addCustomCounter}
+          onRemoveCustomCounter={removeCustomCounter}
+          onSetCounterAmount={setCounterAmount}
+          onUpdateCounterIcon={updateCounterIcon}
           onDelete={(id) => {
             const token = tokens.find(t => t.id === id);
             moveToGraveyard(id);

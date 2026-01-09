@@ -1,20 +1,22 @@
 import { useState } from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, Hash } from 'lucide-react';
 import { QuickCreateBar } from './components/QuickCreateBar';
 import { TokenGrid } from './components/TokenGrid';
 import { ActionBar } from './components/ActionBar';
 import { CustomTokenModal } from './components/CustomTokenModal';
 import { Graveyard } from './components/Graveyard';
 import { SettingsPanel } from './components/SettingsPanel';
+import { CounterTypesManager } from './components/CounterTypesManager';
 import { useTokenStore } from './store/tokenStore';
 
 function App() {
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isCounterTypesOpen, setIsCounterTypesOpen] = useState(false);
   const { tokens, graveyard, clearGraveyard, restoreFromGraveyard } = useTokenStore();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col">
       {/* Header - Fixed at top */}
       <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg">
         <div className="flex justify-between items-center p-4">
@@ -24,12 +26,22 @@ function App() {
               {tokens.length} token{tokens.length !== 1 ? 's' : ''}
             </p>
           </div>
-          <button 
-            onClick={() => setIsSettingsOpen(true)}
-            className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
-          >
-            <Settings size={24} />
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setIsCounterTypesOpen(true)}
+              className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
+              title="Manage Counter Types"
+            >
+              <Hash size={24} />
+            </button>
+            <button 
+              onClick={() => setIsSettingsOpen(true)}
+              className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
+              title="Settings"
+            >
+              <Settings size={24} />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -63,6 +75,12 @@ function App() {
       <SettingsPanel
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+      />
+
+      {/* Counter Types Manager */}
+      <CounterTypesManager
+        isOpen={isCounterTypesOpen}
+        onClose={() => setIsCounterTypesOpen(false)}
       />
     </div>
   );
