@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Token, TokenTemplate, Attachment } from '../types/token';
 import { COUNTER_TYPES } from '../types/token';
+import { getScryfallData } from '../hooks/useScryfallData';
 
 interface TokenStore {
   tokens: Token[];
@@ -44,23 +45,37 @@ interface TokenStore {
   removeTemplate: (name: string) => void;
 }
 
-const createTokenFromTemplate = (template: TokenTemplate): Token => ({
-  id: crypto.randomUUID(),
-  name: template.name,
-  power: template.power,
-  toughness: template.toughness,
-  colors: [...template.colors],
-  abilities: template.abilities,
-  imageUrl: template.imageUrl,
-  isTapped: false,
-  hasSummoningSickness: !template.hasHaste, // No summoning sickness if has haste
-  hasHaste: template.hasHaste || false,
-  plusOneCounters: 0,
-  minusOneCounters: 0,
-  counters: [], // Initialize empty counters array
-  attachments: [],
-  createdAt: Date.now(),
-});
+const createTokenFromTemplate = (template: TokenTemplate): Token => {
+  // Check for Scryfall data
+  const scryfallData = getScryfallData(template.name);
+  
+  console.log(`🎴 Creating token: ${template.name}`, {
+    templateImageUrl: template.imageUrl,
+    scryfallImageUrl: scryfallData.imageUrl,
+    templateAbilities: template.abilities,
+    scryfallOracleText: scryfallData.oracleText,
+    finalImageUrl: template.imageUrl || scryfallData.imageUrl,
+    finalAbilities: template.abilities || scryfallData.oracleText,
+  });
+  
+  return {
+    id: crypto.randomUUID(),
+    name: template.name,
+    power: template.power,
+    toughness: template.toughness,
+    colors: [...template.colors],
+    abilities: template.abilities || scryfallData.oracleText || undefined,
+    imageUrl: template.imageUrl || scryfallData.imageUrl || undefined,
+    isTapped: false,
+    hasSummoningSickness: !template.hasHaste, // No summoning sickness if has haste
+    hasHaste: template.hasHaste || false,
+    plusOneCounters: 0,
+    minusOneCounters: 0,
+    counters: [], // Initialize empty counters array
+    attachments: [],
+    createdAt: Date.now(),
+  };
+};
 
 export const useTokenStore = create<TokenStore>()(
   persist(

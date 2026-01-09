@@ -108,13 +108,14 @@ export const TokenGrid: React.FC = () => {
     <>
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       
-      <div className={`grid ${gridCols} gap-4 p-4 pb-24 card-size-${cardSize}`}>
+      <div className={`grid ${gridCols} gap-4 p-4 pb-24 card-size-${cardSize}`} style={{ overflow: 'visible' }}>
         {groups.map((group) => {
           if (group.count === 1) {
             // Single token - use regular TokenCard
             const token = group.tokens[0];
             return (
-              <TokenCard
+              <div key={token.id} className="relative" style={{ overflow: 'visible' }}>
+                <TokenCard
                 key={token.id}
                 token={token}
                 onTap={() => toggleTap(token.id)}
@@ -135,10 +136,12 @@ export const TokenGrid: React.FC = () => {
                   }
                 }}
               />
+              </div>
             );
           } else {
             // Stacked tokens - use StackedTokenCard
             return (
+              <div key={group.key} className="relative" style={{ overflow: 'visible' }}>
               <StackedTokenCard
                 key={group.key}
                 token={group.representative}
@@ -164,6 +167,7 @@ export const TokenGrid: React.FC = () => {
                   });
                 }}
               />
+              </div>
             );
           }
         })}

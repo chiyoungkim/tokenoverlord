@@ -74,11 +74,27 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
         <>
           <div
             className="absolute top-1.5 left-1.5 w-full h-full rounded-lg border-2 border-gray-400 opacity-30 shadow-md"
-            style={{ background: getColorGradient(token.colors) }}
+            style={{
+              ...(token.imageUrl ? {
+                backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.3)), url(${token.imageUrl})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              } : {
+                background: getColorGradient(token.colors),
+              }),
+            }}
           />
           <div
             className="absolute top-1 left-1 w-full h-full rounded-lg border-2 border-gray-400 opacity-50 shadow-lg"
-            style={{ background: getColorGradient(token.colors) }}
+            style={{
+              ...(token.imageUrl ? {
+                backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.3)), url(${token.imageUrl})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              } : {
+                background: getColorGradient(token.colors),
+              }),
+            }}
           />
         </>
       )}
@@ -93,8 +109,15 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
           isDying ? 'ring-4 ring-red-600 ring-offset-2' : ''
         }`}
         style={{
-          background: getColorGradient(token.colors),
-          transform: token.isTapped ? 'rotate(90deg)' : 'none',
+          ...(token.imageUrl ? {
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.3)), url(${token.imageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          } : {
+            background: getColorGradient(token.colors),
+          }),
+          transform: token.isTapped ? 'rotate(90deg) scale(0.7)' : 'none',
+          transformOrigin: 'center center',
         }}
         onClick={onTap}
       >

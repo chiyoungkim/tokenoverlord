@@ -20,7 +20,7 @@ export interface Attachment {
 export interface Counter {
   type: string; // e.g., "+1/+1", "-1/-1", "loyalty", "charge", "energy"
   count: number;
-  icon?: string; // Optional icon for display
+  icon?: string; // Customizable emoji/icon for display
 }
 
 export interface Token {
@@ -93,7 +93,6 @@ export const COMMON_TOKENS: TokenTemplate[] = [
     power: null,
     toughness: null,
     colors: [],
-    abilities: '{T}, Sacrifice this artifact: Add one mana of any color.',
     imageUrl: undefined,
   },
   {
@@ -101,7 +100,6 @@ export const COMMON_TOKENS: TokenTemplate[] = [
     power: null,
     toughness: null,
     colors: [],
-    abilities: '{2}, {T}, Sacrifice this artifact: You gain 3 life.',
     imageUrl: undefined,
   },
 ];

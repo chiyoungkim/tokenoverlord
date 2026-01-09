@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Hash } from 'lucide-react';
+import { Settings, Hash, Bug } from 'lucide-react';
 import { QuickCreateBar } from './components/QuickCreateBar';
 import { TokenGrid } from './components/TokenGrid';
 import { ActionBar } from './components/ActionBar';
@@ -7,13 +7,19 @@ import { CustomTokenModal } from './components/CustomTokenModal';
 import { Graveyard } from './components/Graveyard';
 import { SettingsPanel } from './components/SettingsPanel';
 import { CounterTypesManager } from './components/CounterTypesManager';
+import { ScryfallDebugPanel } from './components/ScryfallDebugPanel';
 import { useTokenStore } from './store/tokenStore';
+import { useScryfallData } from './hooks/useScryfallData';
 
 function App() {
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isCounterTypesOpen, setIsCounterTypesOpen] = useState(false);
+  const [showDebugPanel, setShowDebugPanel] = useState(true); // Show by default for now
   const { tokens, graveyard, clearGraveyard, restoreFromGraveyard } = useTokenStore();
+  
+  // Fetch Scryfall data for common tokens on mount
+  const { isLoading: scryfallLoading, isReady: scryfallReady } = useScryfallData();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -22,11 +28,26 @@ function App() {
         <div className="flex justify-between items-center px-6 py-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Token Tracker</h1>
-            <p className="text-sm text-indigo-100 font-medium">
-              {tokens.length} token{tokens.length !== 1 ? 's' : ''} on battlefield
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-indigo-100 font-medium">
+                {tokens.length} token{tokens.length !== 1 ? 's' : ''} on battlefield
+              </p>
+              {scryfallLoading && (
+                <span className="text-xs text-amber-300 font-medium">🔮 Loading card art...</span>
+              )}
+              {scryfallReady && (
+                <span className="text-xs text-emerald-300 font-medium">✓ Card art ready</span>
+              )}
+            </div>
           </div>
           <div className="flex gap-3">
+            <button 
+              onClick={() => setShowDebugPanel(!showDebugPanel)}
+              className={`p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 ${showDebugPanel ? 'bg-white/20' : ''}`}
+              title="Toggle Scryfall Debug"
+            >
+              <Bug size={24} />
+            </button>
             <button 
               onClick={() => setIsCounterTypesOpen(true)}
               className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95"
@@ -82,6 +103,9 @@ function App() {
         isOpen={isCounterTypesOpen}
         onClose={() => setIsCounterTypesOpen(false)}
       />
+      
+      {/* Scryfall Debug Panel */}
+      {showDebugPanel && <ScryfallDebugPanel />}
     </div>
   );
 }

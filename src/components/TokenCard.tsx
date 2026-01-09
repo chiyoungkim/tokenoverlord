@@ -33,6 +33,17 @@ export const TokenCard: React.FC<TokenCardProps> = ({
   onSetCounterAmount,
   onUpdateCounterIcon,
 }) => {
+  // Debug: Log token image URL and background calculation
+  console.log(`🖼️ TokenCard rendering: ${token.name}`, {
+    imageUrl: token.imageUrl,
+    hasImageUrl: !!token.imageUrl,
+    imageUrlType: typeof token.imageUrl,
+    willUseImage: token.imageUrl ? 'YES' : 'NO',
+    backgroundImage: token.imageUrl 
+      ? `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.3)), url(${token.imageUrl})`
+      : 'NONE',
+  });
+  
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const [counterManagerOpen, setCounterManagerOpen] = useState(false);
@@ -97,7 +108,13 @@ export const TokenCard: React.FC<TokenCardProps> = ({
             isDying ? 'ring-4 ring-red-600 ring-offset-2' : ''
           }`}
           style={{
-            background: getColorGradient(token.colors),
+            ...(token.imageUrl ? {
+              backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.3)), url(${token.imageUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            } : {
+              background: getColorGradient(token.colors),
+            }),
             transform: token.isTapped ? 'rotate(90deg) scale(0.7)' : 'none',
             transformOrigin: 'center center',
             aspectRatio: '2.5 / 2',
