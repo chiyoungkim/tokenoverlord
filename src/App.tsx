@@ -17,26 +17,26 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header - Fixed at top */}
-      <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg">
-        <div className="flex justify-between items-center p-4">
+      {/* Header - Modern gradient with better shadows */}
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 text-white shadow-xl">
+        <div className="flex justify-between items-center px-6 py-4">
           <div>
-            <h1 className="text-2xl font-bold">Token Tracker</h1>
-            <p className="text-sm text-blue-100">
-              {tokens.length} token{tokens.length !== 1 ? 's' : ''}
+            <h1 className="text-2xl font-bold tracking-tight">Token Tracker</h1>
+            <p className="text-sm text-indigo-100 font-medium">
+              {tokens.length} token{tokens.length !== 1 ? 's' : ''} on battlefield
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button 
               onClick={() => setIsCounterTypesOpen(true)}
-              className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
+              className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95"
               title="Manage Counter Types"
             >
               <Hash size={24} />
             </button>
             <button 
               onClick={() => setIsSettingsOpen(true)}
-              className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
+              className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95"
               title="Settings"
             >
               <Settings size={24} />
@@ -45,8 +45,8 @@ function App() {
         </div>
       </header>
 
-      {/* Quick Create Bar - Also sticky below header */}
-      <div className="sticky top-[72px] z-40 bg-white shadow-md">
+      {/* Quick Create Bar - Modern card-style with subtle shadow */}
+      <div className="sticky top-[80px] z-40 bg-slate-900/95 backdrop-blur-sm border-b border-slate-800 shadow-lg">
         <QuickCreateBar onCustomCreate={() => setIsCustomModalOpen(true)} />
       </div>
 

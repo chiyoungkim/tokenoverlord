@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
 import type { Color, TokenTemplate } from '../types/token';
 import { useTokenStore } from '../store/tokenStore';
+import { ModalWrapper } from './ModalWrapper';
 
 interface CustomTokenModalProps {
   isOpen: boolean;
@@ -60,154 +60,160 @@ export const CustomTokenModal: React.FC<CustomTokenModalProps> = ({ isOpen, onCl
     onClose();
   };
 
-  if (!isOpen) return null;
-
-  const colorButtons: { color: Color; label: string; bg: string }[] = [
-    { color: 'W', label: 'White', bg: 'bg-yellow-100' },
-    { color: 'U', label: 'Blue', bg: 'bg-blue-500' },
-    { color: 'B', label: 'Black', bg: 'bg-gray-900' },
-    { color: 'R', label: 'Red', bg: 'bg-red-600' },
-    { color: 'G', label: 'Green', bg: 'bg-green-600' },
-    { color: 'C', label: 'Colorless', bg: 'bg-gray-400' },
+  const colorButtons: { color: Color; label: string; bgClass: string; hoverClass: string }[] = [
+    { color: 'W', label: 'White', bgClass: 'bg-gray-100', hoverClass: 'hover:bg-gray-200' },
+    { color: 'U', label: 'Blue', bgClass: 'bg-blue-500', hoverClass: 'hover:bg-blue-600' },
+    { color: 'B', label: 'Black', bgClass: 'bg-gray-800', hoverClass: 'hover:bg-gray-900' },
+    { color: 'R', label: 'Red', bgClass: 'bg-red-500', hoverClass: 'hover:bg-red-600' },
+    { color: 'G', label: 'Green', bgClass: 'bg-green-500', hoverClass: 'hover:bg-green-600' },
+    { color: 'C', label: 'Colorless', bgClass: 'bg-gray-400', hoverClass: 'hover:bg-gray-500' },
   ];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-bold">Create Custom Token</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
-            <X size={24} />
-          </button>
+    <ModalWrapper
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Create Custom Token"
+      maxWidth="2xl"
+    >
+      <div className="p-6 space-y-6">
+        {/* Name Input */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Token Name *
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g., Zombie, Dragon, Treasure"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all text-gray-900 font-medium"
+            autoFocus
+          />
         </div>
 
-        {/* Form */}
-        <div className="p-4 space-y-4">
-          {/* Name */}
+        {/* Power/Toughness */}
+        <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Token Name *</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              placeholder="e.g., Angel, Treasure, Dragon"
-            />
-          </div>
-
-          {/* Power/Toughness */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium mb-1">Power</label>
-              <input
-                type="number"
-                value={power}
-                onChange={(e) => setPower(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                placeholder="Leave empty for non-creatures"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Toughness</label>
-              <input
-                type="number"
-                value={toughness}
-                onChange={(e) => setToughness(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                placeholder="Leave empty for non-creatures"
-              />
-            </div>
-          </div>
-
-          {/* Colors */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Colors</label>
-            <div className="flex flex-wrap gap-2">
-              {colorButtons.map(({ color, label, bg }) => (
-                <button
-                  key={color}
-                  onClick={() => handleColorToggle(color)}
-                  className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
-                    colors.includes(color)
-                      ? `${bg} text-white ring-2 ring-offset-2 ring-blue-500`
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  } ${color === 'B' && colors.includes(color) ? 'text-white' : ''}`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Abilities */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Abilities (Optional)</label>
-            <textarea
-              value={abilities}
-              onChange={(e) => setAbilities(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              rows={3}
-              placeholder="e.g., Flying, Haste"
-            />
-          </div>
-
-          {/* Quantity */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Quantity</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Power
+            </label>
             <input
               type="number"
-              min="1"
-              max="50"
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              value={power}
+              onChange={(e) => setPower(e.target.value)}
+              placeholder="X"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all text-gray-900 font-medium text-center"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Toughness
+            </label>
+            <input
+              type="number"
+              value={toughness}
+              onChange={(e) => setToughness(e.target.value)}
+              placeholder="X"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all text-gray-900 font-medium text-center"
             />
           </div>
         </div>
 
-        {/* Haste Checkbox */}
-        <div className="px-4 pb-2">
-          <label className="flex items-center gap-2 cursor-pointer">
+        {/* Color Selection */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-3">
+            Colors
+          </label>
+          <div className="grid grid-cols-3 gap-3">
+            {colorButtons.map(({ color, label, bgClass, hoverClass }) => (
+              <button
+                key={color}
+                onClick={() => handleColorToggle(color)}
+                className={`px-4 py-3 ${bgClass} ${hoverClass} rounded-xl font-semibold transition-all duration-200 active:scale-95 ${
+                  colors.includes(color)
+                    ? 'ring-4 ring-indigo-400 ring-offset-2 shadow-lg'
+                    : 'opacity-60 hover:opacity-100'
+                } ${color === 'W' ? 'text-gray-800' : 'text-white'}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Abilities */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Abilities (Optional)
+          </label>
+          <textarea
+            value={abilities}
+            onChange={(e) => setAbilities(e.target.value)}
+            placeholder="e.g., Flying, Vigilance, Trample"
+            rows={3}
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all text-gray-900 resize-none"
+          />
+        </div>
+
+        {/* Quantity */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Quantity
+          </label>
+          <input
+            type="number"
+            min="1"
+            max="999"
+            value={quantity}
+            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all text-gray-900 font-medium text-center"
+          />
+        </div>
+
+        {/* Checkboxes */}
+        <div className="space-y-3 pt-2">
+          <label className="flex items-center gap-3 cursor-pointer group">
             <input
               type="checkbox"
               checked={hasHaste}
               onChange={(e) => setHasHaste(e.target.checked)}
-              className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+              className="w-5 h-5 rounded-lg border-2 border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer transition-all"
             />
-            <span className="text-sm text-gray-700">Haste? (no summoning sickness)</span>
+            <span className="text-sm font-semibold text-gray-700 group-hover:text-indigo-600 transition-colors">
+              Has Haste (no summoning sickness)
+            </span>
           </label>
-        </div>
 
-        {/* Save as Preset */}
-        <div className="px-4 pb-4">
-          <label className="flex items-center gap-2 cursor-pointer">
+          <label className="flex items-center gap-3 cursor-pointer group">
             <input
               type="checkbox"
               checked={saveAsPreset}
               onChange={(e) => setSaveAsPreset(e.target.checked)}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              className="w-5 h-5 rounded-lg border-2 border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer transition-all"
             />
-            <span className="text-sm text-gray-700">Save as preset for quick creation later</span>
+            <span className="text-sm font-semibold text-gray-700 group-hover:text-indigo-600 transition-colors">
+              Save as preset
+            </span>
           </label>
         </div>
 
-        {/* Footer */}
-        <div className="flex gap-3 p-4 border-t">
+        {/* Action Buttons */}
+        <div className="flex gap-3 pt-4">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-xl font-semibold shadow-md hover:shadow-lg active:scale-95 transition-all duration-200"
           >
             Cancel
           </button>
           <button
             onClick={handleCreate}
-            className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="flex-1 px-6 py-3 bg-gradient-to-br from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200"
           >
-            Create
+            Create Token{quantity > 1 ? 's' : ''}
           </button>
         </div>
       </div>
-    </div>
+    </ModalWrapper>
   );
 };

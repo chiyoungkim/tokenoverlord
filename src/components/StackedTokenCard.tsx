@@ -116,9 +116,9 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
             e.stopPropagation();
             onClickCount();
           }}
-          className="absolute top-8 right-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-full w-10 h-10 flex items-center justify-center shadow-lg z-20 border-2 border-white transition-colors"
+          className="absolute top-8 right-2 bg-gradient-to-br from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-base sm:text-sm font-black rounded-full w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center shadow-xl z-20 border-2 border-white ring-4 ring-indigo-300/50 transition-all active:scale-95"
         >
-          x{count}
+          ×{count}
         </button>
 
         {/* TAP ALL BUTTON - Left side, middle (only when untapped) */}

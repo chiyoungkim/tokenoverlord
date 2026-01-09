@@ -1,5 +1,6 @@
-import { X } from 'lucide-react';
 import { useSettingsStore, type CardSize } from '../store/settingsStore';
+import { ModalWrapper } from './ModalWrapper';
+import { Maximize, Layers } from 'lucide-react';
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -9,140 +10,151 @@ interface SettingsPanelProps {
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
   const { autoStackEnabled, minStackSize, cardSize, setAutoStackEnabled, setMinStackSize, setCardSize } = useSettingsStore();
 
-  if (!isOpen) return null;
-
   return (
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-      onClick={onClose}
+    <ModalWrapper
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Settings"
+      maxWidth="lg"
     >
-      <div 
-        className="bg-white rounded-lg shadow-xl max-w-md w-full"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-t-lg flex justify-between items-center">
-          <h2 className="text-xl font-bold">Settings</h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
-          >
-            <X size={24} />
-          </button>
-        </div>
-
-        {/* Settings Content */}
-        <div className="p-6 space-y-6">
-          {/* Card Size Selector */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
+      <div className="p-6 space-y-8">
+        {/* Card Size Selector */}
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+            <Maximize className="text-indigo-600" size={20} />
+            <label className="text-base font-bold text-gray-800">
               Card Size
             </label>
-            <div className="grid grid-cols-3 gap-2">
-              {(['small', 'medium', 'large'] as CardSize[]).map((size) => (
-                <button
-                  key={size}
-                  onClick={() => setCardSize(size)}
-                  className={`px-4 py-3 rounded-lg font-medium transition-all ${
-                    cardSize === size
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <div className="text-sm capitalize">{size}</div>
-                  <div className="text-xs opacity-75 mt-1">
-                    {size === 'small' && '80px'}
-                    {size === 'medium' && '100px'}
-                    {size === 'large' && '120px'}
-                  </div>
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-gray-600 mt-2">
-              Smaller cards fit more tokens on screen
-            </p>
           </div>
-
-          {/* Auto-Stack Toggle */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-semibold text-gray-700">
-                Auto-Stack Tokens
-              </label>
+          <div className="grid grid-cols-3 gap-3">
+            {(['small', 'medium', 'large'] as CardSize[]).map((size) => (
               <button
-                onClick={() => setAutoStackEnabled(!autoStackEnabled)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  autoStackEnabled ? 'bg-blue-600' : 'bg-gray-300'
+                key={size}
+                onClick={() => setCardSize(size)}
+                className={`px-6 py-4 rounded-xl font-semibold transition-all duration-200 ${
+                  cardSize === size
+                    ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-lg ring-4 ring-indigo-200 scale-105'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-102'
                 }`}
               >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    autoStackEnabled ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
+                <div className="text-sm capitalize font-bold">{size}</div>
+                <div className="text-xs opacity-80 mt-1 font-medium">
+                  {size === 'small' && '80px'}
+                  {size === 'medium' && '100px'}
+                  {size === 'large' && '120px'}
+                </div>
               </button>
-            </div>
-            <p className="text-xs text-gray-600">
-              Automatically group identical tokens together
-            </p>
+            ))}
           </div>
-
-          {/* Min Stack Size */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Minimum Tokens to Stack
-            </label>
-            <div className="flex items-center gap-4">
-              <input
-                type="range"
-                min="2"
-                max="10"
-                value={minStackSize}
-                onChange={(e) => setMinStackSize(parseInt(e.target.value))}
-                disabled={!autoStackEnabled}
-                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  background: autoStackEnabled
-                    ? `linear-gradient(to right, #2563eb 0%, #2563eb ${((minStackSize - 2) / 8) * 100}%, #e5e7eb ${((minStackSize - 2) / 8) * 100}%, #e5e7eb 100%)`
-                    : '#e5e7eb'
-                }}
-              />
-              <span className="text-lg font-bold text-gray-700 w-8 text-center">
-                {minStackSize}
-              </span>
-            </div>
-            <p className="text-xs text-gray-600 mt-2">
-              {autoStackEnabled
-                ? `Stack when you have ${minStackSize}+ identical tokens`
-                : 'Enable auto-stack to adjust this setting'}
-            </p>
-          </div>
-
-          {/* Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-blue-900 mb-2">
-              How Auto-Stacking Works
-            </h3>
-            <ul className="text-xs text-blue-800 space-y-1">
-              <li>• Tokens group when ALL properties match</li>
-              <li>• Name, P/T, colors, abilities, tap state, counters</li>
-              <li>• Click count badge or card to open stack</li>
-              <li>• Use ⟲/↻ buttons to tap/untap entire stack</li>
-              <li>• Stacks split automatically when states differ</li>
-            </ul>
-          </div>
+          <p className="text-sm text-gray-600 mt-3 font-medium">
+            Smaller cards fit more tokens on screen
+          </p>
         </div>
 
-        {/* Footer */}
-        <div className="border-t border-gray-200 p-4 flex justify-end">
+        {/* Divider */}
+        <div className="border-t border-gray-200" />
+
+        {/* Auto-Stack Toggle */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Layers className="text-emerald-600" size={20} />
+              <label className="text-base font-bold text-gray-800">
+                Auto-Stack Tokens
+              </label>
+            </div>
+            <button
+              onClick={() => setAutoStackEnabled(!autoStackEnabled)}
+              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-all duration-200 ${
+                autoStackEnabled ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-lg' : 'bg-gray-300'
+              }`}
+            >
+              <span
+                className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-md transition-transform duration-200 ${
+                  autoStackEnabled ? 'translate-x-7' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+          <p className="text-sm text-gray-600 font-medium">
+            Automatically group identical tokens together
+          </p>
+        </div>
+
+        {/* Min Stack Size Slider */}
+        <div className={`transition-opacity duration-200 ${!autoStackEnabled ? 'opacity-50' : ''}`}>
+          <label className="block text-base font-bold text-gray-800 mb-4">
+            Minimum Tokens to Stack
+          </label>
+          <div className="flex items-center gap-4">
+            <input
+              type="range"
+              min="2"
+              max="10"
+              value={minStackSize}
+              onChange={(e) => setMinStackSize(parseInt(e.target.value))}
+              disabled={!autoStackEnabled}
+              className="flex-1 h-3 bg-gray-200 rounded-full appearance-none cursor-pointer disabled:cursor-not-allowed"
+              style={{
+                background: autoStackEnabled
+                  ? `linear-gradient(to right, #10b981 0%, #10b981 ${((minStackSize - 2) / 8) * 100}%, #e5e7eb ${((minStackSize - 2) / 8) * 100}%, #e5e7eb 100%)`
+                  : '#e5e7eb'
+              }}
+            />
+            <span className="text-2xl font-bold text-indigo-600 w-12 text-center bg-indigo-50 rounded-xl px-3 py-2">
+              {minStackSize}
+            </span>
+          </div>
+          <p className="text-sm text-gray-600 mt-3 font-medium">
+            {autoStackEnabled
+              ? `Stack when you have ${minStackSize}+ identical tokens`
+              : 'Enable auto-stack to adjust this setting'}
+          </p>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-200" />
+
+        {/* Info Box */}
+        <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-2xl p-5">
+          <h3 className="text-base font-bold text-indigo-900 mb-3 flex items-center gap-2">
+            <Layers size={18} />
+            How Auto-Stacking Works
+          </h3>
+          <ul className="text-sm text-indigo-800 space-y-2 font-medium">
+            <li className="flex items-start">
+              <span className="text-indigo-500 mr-2">•</span>
+              <span>Tokens group when ALL properties match</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-indigo-500 mr-2">•</span>
+              <span>Name, P/T, colors, abilities, tap state, counters</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-indigo-500 mr-2">•</span>
+              <span>Click count badge or card to open stack</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-indigo-500 mr-2">•</span>
+              <span>Use ⟲/↻ buttons to tap/untap entire stack</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-indigo-500 mr-2">•</span>
+              <span>Stacks split automatically when states differ</span>
+            </li>
+          </ul>
+        </div>
+
+        {/* Footer Button */}
+        <div className="pt-4">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
+            className="w-full px-6 py-3 bg-gradient-to-br from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white rounded-xl font-bold shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200"
           >
             Done
           </button>
         </div>
       </div>
-    </div>
+    </ModalWrapper>
   );
 };

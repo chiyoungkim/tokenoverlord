@@ -44,70 +44,89 @@ export const ActionBar: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-300 shadow-lg">
-      <div className="flex justify-around p-3 max-w-2xl mx-auto">
-        <button
-          onClick={tapAll}
-          className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors"
-          disabled={tokens.length === 0}
-        >
-          <i className="ms ms-tap ms-cost" style={{ fontSize: '24px', color: '#374151' }} />
-          <span className="text-xs font-medium text-gray-700">Tap All</span>
-        </button>
+    <div className="fixed bottom-6 left-0 right-0 flex justify-center z-40 pointer-events-none px-2">
+      <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700 shadow-2xl rounded-2xl pointer-events-auto max-w-full">
+        {/* Mobile: 2 rows, Desktop: 1 row */}
+        <div className="flex flex-col sm:flex-row">
+          {/* Row 1: Tap actions + Counter actions */}
+          <div className="flex gap-1 p-2 border-b sm:border-b-0 sm:border-r border-slate-700">
+            {/* Tap Actions Group */}
+            <button
+              onClick={tapAll}
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-slate-800 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled={tokens.length === 0}
+            >
+              <i className="ms ms-tap ms-cost" style={{ fontSize: '24px', color: '#60a5fa' }} />
+              <span className="text-[10px] font-semibold text-slate-300">Tap</span>
+            </button>
 
-        <button
-          onClick={untapAll}
-          className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors"
-          disabled={tokens.length === 0}
-        >
-          <i className="ms ms-untap ms-cost" style={{ fontSize: '24px', color: '#374151' }} />
-          <span className="text-xs font-medium text-gray-700">Untap All</span>
-        </button>
+            <button
+              onClick={untapAll}
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-slate-800 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled={tokens.length === 0}
+            >
+              <i className="ms ms-untap ms-cost" style={{ fontSize: '24px', color: '#60a5fa' }} />
+              <span className="text-[10px] font-semibold text-slate-300">Untap</span>
+            </button>
 
-        <button
-          onClick={handleAddCounterToAll}
-          className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-green-50 rounded-lg transition-colors"
-          disabled={tokens.length === 0}
-        >
-          <PlusCircle size={24} className="text-green-600" />
-          <span className="text-xs font-medium text-green-600">+1/+1 All</span>
-        </button>
+            {/* Divider - Hidden on mobile */}
+            <div className="hidden sm:block w-px bg-slate-700 my-2" />
 
-        <button
-          onClick={handleRemoveCounterToAll}
-          className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-red-50 rounded-lg transition-colors"
-          disabled={tokens.length === 0}
-        >
-          <MinusCircle size={24} className="text-red-600" />
-          <span className="text-xs font-medium text-red-600">-1/-1 All</span>
-        </button>
+            {/* Counter Actions Group */}
+            <button
+              onClick={handleAddCounterToAll}
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-emerald-950/50 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled={tokens.length === 0}
+            >
+              <PlusCircle size={24} className="text-emerald-400" />
+              <span className="text-[10px] font-semibold text-emerald-400">+1/+1</span>
+            </button>
 
-        <button
-          onClick={clearSummoningSickness}
-          className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors"
-          disabled={tokens.length === 0}
-        >
-          <Sun size={24} className="text-yellow-600" />
-          <span className="text-xs font-medium text-gray-700">New Turn</span>
-        </button>
+            <button
+              onClick={handleRemoveCounterToAll}
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-rose-950/50 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled={tokens.length === 0}
+            >
+              <MinusCircle size={24} className="text-rose-400" />
+              <span className="text-[10px] font-semibold text-rose-400">-1/-1</span>
+            </button>
+          </div>
 
-        <button
-          onClick={handleCleanup}
-          className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-red-50 rounded-lg transition-colors"
-          disabled={tokens.length === 0}
-        >
-          <Skull size={24} className="text-orange-600" />
-          <span className="text-xs font-medium text-orange-600">Cleanup</span>
-        </button>
+          {/* Row 2: Game state + Destructive actions */}
+          <div className="flex gap-1 p-2">
+            {/* Game State Actions */}
+            <button
+              onClick={clearSummoningSickness}
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-amber-950/50 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled={tokens.length === 0}
+            >
+              <Sun size={24} className="text-amber-400" />
+              <span className="text-[10px] font-semibold text-amber-400">Turn</span>
+            </button>
 
-        <button
-          onClick={handleClearAll}
-          className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-red-50 rounded-lg transition-colors"
-          disabled={tokens.length === 0}
-        >
-          <Trash2 size={24} className="text-red-600" />
-          <span className="text-xs font-medium text-red-600">Clear</span>
-        </button>
+            <button
+              onClick={handleCleanup}
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-orange-950/50 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled={tokens.length === 0}
+            >
+              <Skull size={24} className="text-orange-400" />
+              <span className="text-[10px] font-semibold text-orange-400">Clean</span>
+            </button>
+
+            {/* Divider */}
+            <div className="w-px bg-slate-700 my-2" />
+
+            {/* Destructive Action */}
+            <button
+              onClick={handleClearAll}
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-rose-950/50 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled={tokens.length === 0}
+            >
+              <Trash2 size={24} className="text-rose-500" />
+              <span className="text-[10px] font-semibold text-rose-500">Clear</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

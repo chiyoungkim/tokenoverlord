@@ -29,11 +29,11 @@ export const TokenGrid: React.FC = () => {
   const [expandedTokenIds, setExpandedTokenIds] = useState<Set<string>>(new Set());
   const [prevTokenCount, setPrevTokenCount] = useState(tokens.length);
 
-  // Determine grid columns based on card size
+  // Determine grid columns based on card size - MOBILE OPTIMIZED (2 cols on mobile)
   const gridCols = {
-    small: 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8',
-    medium: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6',
-    large: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5',
+    small: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7',
+    medium: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5',
+    large: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4',
   }[cardSize];
 
   // Group tokens if auto-stack is enabled
