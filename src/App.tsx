@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Hash, Bug } from 'lucide-react';
+import { Settings, Hash, Bug, Layers } from 'lucide-react';
 import { QuickCreateBar } from './components/QuickCreateBar';
 import { TokenGrid } from './components/TokenGrid';
 import { ActionBar } from './components/ActionBar';
@@ -8,6 +8,7 @@ import { Graveyard } from './components/Graveyard';
 import { SettingsPanel } from './components/SettingsPanel';
 import { CounterTypesManager } from './components/CounterTypesManager';
 import { ScryfallDebugPanel } from './components/ScryfallDebugPanel';
+import { TokenTemplateManager } from './components/TokenTemplateManager';
 import { useTokenStore } from './store/tokenStore';
 import { useScryfallData } from './hooks/useScryfallData';
 
@@ -15,6 +16,7 @@ function App() {
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isCounterTypesOpen, setIsCounterTypesOpen] = useState(false);
+  const [isTemplateManagerOpen, setIsTemplateManagerOpen] = useState(false);
   const [showDebugPanel, setShowDebugPanel] = useState(true); // Show by default for now
   const { tokens, graveyard, clearGraveyard, restoreFromGraveyard } = useTokenStore();
   
@@ -41,6 +43,13 @@ function App() {
             </div>
           </div>
           <div className="flex gap-3">
+            <button 
+              onClick={() => setIsTemplateManagerOpen(true)}
+              className="p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95"
+              title="Manage Templates"
+            >
+              <Layers size={24} />
+            </button>
             <button 
               onClick={() => setShowDebugPanel(!showDebugPanel)}
               className={`p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 ${showDebugPanel ? 'bg-white/20' : ''}`}
@@ -102,6 +111,12 @@ function App() {
       <CounterTypesManager
         isOpen={isCounterTypesOpen}
         onClose={() => setIsCounterTypesOpen(false)}
+      />
+      
+      {/* Token Template Manager */}
+      <TokenTemplateManager
+        isOpen={isTemplateManagerOpen}
+        onClose={() => setIsTemplateManagerOpen(false)}
       />
       
       {/* Scryfall Debug Panel */}

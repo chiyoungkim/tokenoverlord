@@ -1,9 +1,10 @@
 import { useState, useRef } from 'react';
 import type { Token } from '../types/token';
 import { getColorGradient, getColorBorder, isLightColor } from '../utils/colors';
-import { Plus, Minus, Copy, Trash2, Hash } from 'lucide-react';
+import { Plus, Minus, Copy, Trash2, Hash, Paperclip } from 'lucide-react';
 import { TokenTooltip } from './TokenTooltip';
 import { CounterManager } from './CounterManager';
+import { AttachmentManager } from './AttachmentManager';
 import { parseManaSymbols } from '../utils/manaSymbols';
 
 interface TokenCardProps {
@@ -18,6 +19,8 @@ interface TokenCardProps {
   onRemoveCustomCounter: (counterType: string) => void;
   onSetCounterAmount: (counterType: string, amount: number) => void;
   onUpdateCounterIcon: (counterType: string, icon: string) => void;
+  onAddAttachment: (tokenId: string, attachment: import('../types/token').Attachment) => void;
+  onRemoveAttachment: (tokenId: string, attachmentName: string) => void;
 }
 
 export const TokenCard: React.FC<TokenCardProps> = ({
@@ -32,6 +35,8 @@ export const TokenCard: React.FC<TokenCardProps> = ({
   onRemoveCustomCounter,
   onSetCounterAmount,
   onUpdateCounterIcon,
+  onAddAttachment,
+  onRemoveAttachment,
 }) => {
   // Debug: Log token image URL and background calculation
   console.log(`🖼️ TokenCard rendering: ${token.name}`, {
@@ -46,7 +51,9 @@ export const TokenCard: React.FC<TokenCardProps> = ({
   
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  const [tooltipDismissed, setTooltipDismissed] = useState(false);
   const [counterManagerOpen, setCounterManagerOpen] = useState(false);
+  const [attachmentManagerOpen, setAttachmentManagerOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const tooltipTimeout = useRef<number | null>(null);
   
@@ -60,8 +67,10 @@ export const TokenCard: React.FC<TokenCardProps> = ({
         height: rect.height,
       });
     }
-    // Delay tooltip to avoid flicker
-    tooltipTimeout.current = setTimeout(() => setTooltipVisible(true), 500);
+    // Only show tooltip if it wasn't dismissed
+    if (!tooltipDismissed) {
+      tooltipTimeout.current = setTimeout(() => setTooltipVisible(true), 500);
+    }
   };
 
   const handleMouseLeave = () => {
@@ -69,6 +78,7 @@ export const TokenCard: React.FC<TokenCardProps> = ({
       clearTimeout(tooltipTimeout.current);
     }
     setTooltipVisible(false);
+    setTooltipDismissed(false); // Reset dismissed state on mouse leave
   };
   const isCreature = token.power !== null && token.toughness !== null;
   const useDarkText = isLightColor(token.colors);
@@ -94,7 +104,15 @@ export const TokenCard: React.FC<TokenCardProps> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <TokenTooltip token={token} visible={tooltipVisible} position={tooltipPosition} />
+      <TokenTooltip 
+        token={token} 
+        visible={tooltipVisible} 
+        position={tooltipPosition}
+        onDismiss={() => {
+          setTooltipVisible(false);
+          setTooltipDismissed(true);
+        }}
+      />
       
       <div 
         className={`w-full ${token.isTapped ? 'h-[70%]' : 'aspect-[2.5/2]'}`}
@@ -143,7 +161,7 @@ export const TokenCard: React.FC<TokenCardProps> = ({
       {/* Center - Visual indicators only */}
       <div className="absolute inset-0 flex items-center justify-center p-8 pt-16 pb-12">
         <div className="flex flex-col items-center gap-2">
-          {/* Summoning Sickness Badge - Mobile optimized */}
+          {/* Summoning Sickness Badge - Smaller */}
           {token.hasSummoningSickness && (
             <button
               onClick={(e) => {
@@ -152,23 +170,23 @@ export const TokenCard: React.FC<TokenCardProps> = ({
               }}
               className={`${
                 useDarkText ? 'bg-yellow-600' : 'bg-yellow-500'
-              } text-white text-xs sm:text-sm font-bold rounded-full w-14 h-14 sm:w-12 sm:h-12 flex flex-col items-center justify-center shadow-lg border-2 border-white summoning-sick-shimmer cursor-pointer hover:bg-yellow-600 transition-colors`}
+              } text-white text-xs font-bold rounded-full w-10 h-10 flex flex-col items-center justify-center shadow-lg border-2 border-white summoning-sick-shimmer cursor-pointer hover:bg-yellow-600 transition-colors`}
               title="Click to remove summoning sickness"
             >
-              <div className="text-[9px] sm:text-[8px] leading-tight px-1">Summoning<br/>Sickness</div>
+              <div className="text-[7px] leading-tight px-1">Summoning<br/>Sickness</div>
             </button>
           )}
           
-          {/* +1/+1 Counter Badge - Enhanced Design */}
+          {/* +1/+1 Counter Badge - Smaller */}
           {displayPlusCounters > 0 && (
-            <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white text-base font-bold rounded-full w-14 h-14 flex items-center justify-center shadow-xl border-2 border-emerald-200 ring-4 ring-emerald-400/30">
+            <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white text-sm font-bold rounded-full w-10 h-10 flex items-center justify-center shadow-xl border-2 border-emerald-200 ring-2 ring-emerald-400/30">
               +{displayPlusCounters}
             </div>
           )}
           
-          {/* -1/-1 Counter Badge - Enhanced Design */}
+          {/* -1/-1 Counter Badge - Smaller */}
           {displayMinusCounters > 0 && (
-            <div className="bg-gradient-to-br from-rose-500 to-rose-600 text-white text-base font-bold rounded-full w-14 h-14 flex items-center justify-center shadow-xl border-2 border-rose-200 ring-4 ring-rose-400/30">
+            <div className="bg-gradient-to-br from-rose-500 to-rose-600 text-white text-sm font-bold rounded-full w-10 h-10 flex items-center justify-center shadow-xl border-2 border-rose-200 ring-2 ring-rose-400/30">
               -{displayMinusCounters}
             </div>
           )}
@@ -192,6 +210,22 @@ export const TokenCard: React.FC<TokenCardProps> = ({
                     <span>{counter.count}</span>
                   </button>
                 ))}
+            </div>
+          )}
+
+          {/* Attachments Display */}
+          {token.attachments && token.attachments.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 justify-center max-w-full">
+              {token.attachments.map((attachment, idx) => (
+                <div
+                  key={`${attachment.name}-${idx}`}
+                  className="bg-gradient-to-br from-amber-500 to-amber-600 text-white text-xs font-bold rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-lg border-2 border-amber-200 ring-2 ring-amber-400/30"
+                  title={attachment.effect || attachment.name}
+                >
+                  <Paperclip size={12} />
+                  <span className="max-w-[100px] truncate">{attachment.name}</span>
+                </div>
+              ))}
             </div>
           )}
 
@@ -224,7 +258,7 @@ export const TokenCard: React.FC<TokenCardProps> = ({
       <div className="absolute inset-0 pointer-events-none z-30">
         {/* Left 3/4 up: Add Counter */}
         <button
-          className="absolute top-[25%] left-2 p-2.5 sm:p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-95 text-white rounded-full shadow-xl transition-all duration-200 pointer-events-auto opacity-0 group-hover:opacity-100"
+          className="absolute top-[25%] left-2 p-1.5 bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-95 text-white rounded-full shadow-xl transition-all duration-200 pointer-events-auto opacity-0 group-hover:opacity-100"
           onClick={(e) => {
             e.stopPropagation();
             onAddCounter();
@@ -237,12 +271,12 @@ export const TokenCard: React.FC<TokenCardProps> = ({
           }}
           title="Add +1/+1 counter"
         >
-          <Plus size={20} className="sm:w-6 sm:h-6" />
+          <Plus size={16} />
         </button>
 
         {/* Right 3/4 up: Remove Counter */}
         <button
-          className="absolute top-[25%] right-2 p-2.5 sm:p-3 bg-gradient-to-br from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 active:scale-95 text-white rounded-full shadow-xl transition-all duration-200 pointer-events-auto opacity-0 group-hover:opacity-100"
+          className="absolute top-[25%] right-2 p-1.5 bg-gradient-to-br from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 active:scale-95 text-white rounded-full shadow-xl transition-all duration-200 pointer-events-auto opacity-0 group-hover:opacity-100"
           onClick={(e) => {
             e.stopPropagation();
             onRemoveCounter();
@@ -255,12 +289,12 @@ export const TokenCard: React.FC<TokenCardProps> = ({
           }}
           title="Remove +1/+1 counter (or add -1/-1)"
         >
-          <Minus size={20} className="sm:w-6 sm:h-6" />
+          <Minus size={16} />
         </button>
 
         {/* Bottom-left: Duplicate */}
         <button
-          className="absolute bottom-2 left-2 p-1.5 sm:p-2 bg-gradient-to-br from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 active:scale-95 text-white rounded-full shadow-xl transition-all duration-200 pointer-events-auto opacity-0 group-hover:opacity-100"
+          className="absolute bottom-2 left-2 p-1 bg-gradient-to-br from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 active:scale-95 text-white rounded-full shadow-xl transition-all duration-200 pointer-events-auto opacity-0 group-hover:opacity-100"
           onClick={(e) => {
             e.stopPropagation();
             onDuplicate();
@@ -273,12 +307,30 @@ export const TokenCard: React.FC<TokenCardProps> = ({
           }}
           title="Duplicate token"
         >
-          <Copy size={16} className="sm:w-5 sm:h-5" />
+          <Copy size={14} />
+        </button>
+
+        {/* Bottom-left-center: Attachments */}
+        <button
+          className="absolute bottom-2 left-[30%] -translate-x-1/2 p-1 bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 active:scale-95 text-white rounded-full shadow-xl transition-all duration-200 pointer-events-auto opacity-0 group-hover:opacity-100"
+          onClick={(e) => {
+            e.stopPropagation();
+            setAttachmentManagerOpen(true);
+          }}
+          onMouseEnter={() => {
+            if (tooltipTimeout.current) {
+              clearTimeout(tooltipTimeout.current);
+            }
+            setTooltipVisible(false);
+          }}
+          title="Manage attachments"
+        >
+          <Paperclip size={14} />
         </button>
 
         {/* Bottom-center: Counters */}
         <button
-          className="absolute bottom-2 left-1/2 -translate-x-1/2 p-1.5 sm:p-2 bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 active:scale-95 text-white rounded-full shadow-xl transition-all duration-200 pointer-events-auto opacity-0 group-hover:opacity-100"
+          className="absolute bottom-2 left-1/2 -translate-x-1/2 p-1 bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 active:scale-95 text-white rounded-full shadow-xl transition-all duration-200 pointer-events-auto opacity-0 group-hover:opacity-100"
           onClick={(e) => {
             e.stopPropagation();
             setCounterManagerOpen(true);
@@ -291,12 +343,12 @@ export const TokenCard: React.FC<TokenCardProps> = ({
           }}
           title="Manage counters"
         >
-          <Hash size={16} className="sm:w-5 sm:h-5" />
+          <Hash size={14} />
         </button>
 
         {/* Bottom-right: Delete */}
         <button
-          className="absolute bottom-2 right-2 p-1.5 sm:p-2 bg-gradient-to-br from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 active:scale-95 text-white rounded-full shadow-xl transition-all duration-200 pointer-events-auto z-50 opacity-0 group-hover:opacity-100"
+          className="absolute bottom-2 right-2 p-1 bg-gradient-to-br from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 active:scale-95 text-white rounded-full shadow-xl transition-all duration-200 pointer-events-auto z-50 opacity-0 group-hover:opacity-100"
           onClick={(e) => {
             console.log('Delete button clicked!');
             e.stopPropagation();
@@ -310,7 +362,7 @@ export const TokenCard: React.FC<TokenCardProps> = ({
           }}
           title="Delete token"
         >
-          <Trash2 size={16} className="sm:w-5 sm:h-5" />
+          <Trash2 size={14} />
         </button>
       </div>
       </div>
@@ -325,6 +377,15 @@ export const TokenCard: React.FC<TokenCardProps> = ({
         onRemoveCounter={onRemoveCustomCounter}
         onSetAmount={onSetCounterAmount}
         onUpdateIcon={onUpdateCounterIcon}
+      />
+
+      {/* Attachment Manager Modal */}
+      <AttachmentManager
+        token={token}
+        isOpen={attachmentManagerOpen}
+        onClose={() => setAttachmentManagerOpen(false)}
+        onAddAttachment={(attachment) => onAddAttachment(token.id, attachment)}
+        onRemoveAttachment={(name) => onRemoveAttachment(token.id, name)}
       />
     </div>
   );

@@ -15,6 +15,7 @@ export const COUNTER_TYPES = [
 export interface Attachment {
   name: string;
   effect: string; // e.g., "+2/+2", "Flying", "First Strike"
+  imageUrl?: string; // Optional card art URL
 }
 
 export interface Counter {

@@ -8,6 +8,7 @@ interface TokenStore {
   tokens: Token[];
   graveyard: Token[];
   customTemplates: TokenTemplate[];
+  presetArtOverrides: Record<string, string>; // tokenName -> imageUrl
   selectedTokens: Set<string>; // For multi-select
   
   // Token operations
@@ -43,18 +44,24 @@ interface TokenStore {
   // Template operations
   saveTemplate: (template: TokenTemplate) => void;
   removeTemplate: (name: string) => void;
+  updatePresetArt: (tokenName: string, imageUrl: string) => void;
+  updateCustomTemplate: (name: string, updates: Partial<TokenTemplate>) => void;
 }
 
-const createTokenFromTemplate = (template: TokenTemplate): Token => {
+const createTokenFromTemplate = (template: TokenTemplate, presetArtOverrides: Record<string, string> = {}): Token => {
   // Check for Scryfall data
   const scryfallData = getScryfallData(template.name);
   
+  // Check for preset art override
+  const overrideArt = presetArtOverrides[template.name];
+  
   console.log(`🎴 Creating token: ${template.name}`, {
     templateImageUrl: template.imageUrl,
+    overrideArt,
     scryfallImageUrl: scryfallData.imageUrl,
     templateAbilities: template.abilities,
     scryfallOracleText: scryfallData.oracleText,
-    finalImageUrl: template.imageUrl || scryfallData.imageUrl,
+    finalImageUrl: template.imageUrl || overrideArt || scryfallData.imageUrl,
     finalAbilities: template.abilities || scryfallData.oracleText,
   });
   
@@ -65,7 +72,7 @@ const createTokenFromTemplate = (template: TokenTemplate): Token => {
     toughness: template.toughness,
     colors: [...template.colors],
     abilities: template.abilities || scryfallData.oracleText || undefined,
-    imageUrl: template.imageUrl || scryfallData.imageUrl || undefined,
+    imageUrl: template.imageUrl || overrideArt || scryfallData.imageUrl || undefined,
     isTapped: false,
     hasSummoningSickness: !template.hasHaste, // No summoning sickness if has haste
     hasHaste: template.hasHaste || false,
@@ -83,11 +90,13 @@ export const useTokenStore = create<TokenStore>()(
       tokens: [],
       graveyard: [],
       customTemplates: [],
+      presetArtOverrides: {},
       selectedTokens: new Set<string>(),
 
       addToken: (template: TokenTemplate, quantity: number = 1) => {
+        const state = get();
         const newTokens = Array.from({ length: quantity }, () => 
-          createTokenFromTemplate(template)
+          createTokenFromTemplate(template, state.presetArtOverrides)
         );
         set((state) => ({ tokens: [...state.tokens, ...newTokens] }));
       },
@@ -417,6 +426,23 @@ export const useTokenStore = create<TokenStore>()(
       removeTemplate: (name: string) => {
         set((state) => ({
           customTemplates: state.customTemplates.filter((t) => t.name !== name),
+        }));
+      },
+
+      updatePresetArt: (tokenName: string, imageUrl: string) => {
+        set((state) => ({
+          presetArtOverrides: {
+            ...state.presetArtOverrides,
+            [tokenName]: imageUrl,
+          },
+        }));
+      },
+
+      updateCustomTemplate: (name: string, updates: Partial<TokenTemplate>) => {
+        set((state) => ({
+          customTemplates: state.customTemplates.map((t) =>
+            t.name === name ? { ...t, ...updates } : t
+          ),
         }));
       },
     }),

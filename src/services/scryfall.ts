@@ -6,6 +6,7 @@
 export interface ScryfallCard {
   id: string;
   name: string;
+  set_name: string;
   type_line: string;
   oracle_text?: string;
   power?: string;

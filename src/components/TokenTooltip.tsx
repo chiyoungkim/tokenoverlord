@@ -5,9 +5,10 @@ interface TokenTooltipProps {
   token: Token;
   visible: boolean;
   position: { x: number; y: number; width?: number; height?: number };
+  onDismiss: () => void;
 }
 
-export const TokenTooltip: React.FC<TokenTooltipProps> = ({ token, visible, position }) => {
+export const TokenTooltip: React.FC<TokenTooltipProps> = ({ token, visible, position, onDismiss }) => {
   if (!visible) return null;
 
   const plusCounters = token.plusOneCounters ?? 0;
@@ -20,27 +21,22 @@ export const TokenTooltip: React.FC<TokenTooltipProps> = ({ token, visible, posi
   // Use actual card dimensions if provided, otherwise fallback to default
   const tooltipWidth = position.width || 140;
   const tooltipHeight = position.height || 196;
-  
-  // Smart positioning: place tooltip above card if in top half, below if in bottom half
-  const viewportHeight = window.innerHeight;
-  const isInTopHalf = position.y < viewportHeight / 2;
-  const tooltipY = isInTopHalf ? position.y + (position.height || 196) / 2 + 10 : position.y - (position.height || 196) / 2 - 10;
 
   return (
     <div
       className="fixed z-50"
       style={{
         left: `${position.x}px`,
-        top: `${tooltipY}px`,
-        transform: 'translate(-50%, 0)', // Center horizontally only
+        top: `${position.y}px`,
+        transform: 'translate(-50%, -50%)', // Center on token
       }}
       onClick={(e) => {
-        e.stopPropagation(); // Don't propagate to card below
-        // Tooltip will dismiss on mouse leave
+        e.stopPropagation();
+        onDismiss(); // Dismiss on click
       }}
     >
       <div 
-        className="bg-slate-900/95 backdrop-blur-md text-white rounded-2xl shadow-2xl border-2 border-indigo-500/30 p-4 animate-fade-in overflow-y-auto cursor-default"
+        className="bg-slate-900/95 backdrop-blur-md text-white rounded-2xl shadow-2xl border-2 border-indigo-500/30 p-4 animate-fade-in overflow-y-auto cursor-pointer"
         style={{ 
           width: `${tooltipWidth}px`,
           height: `${tooltipHeight}px`,

@@ -20,6 +20,8 @@ export const TokenGrid: React.FC = () => {
     removeCustomCounter,
     setCounterAmount,
     updateCounterIcon,
+    addAttachment,
+    removeAttachment,
   } = useTokenStore();
   
   const { autoStackEnabled, minStackSize, cardSize } = useSettingsStore();
@@ -29,11 +31,11 @@ export const TokenGrid: React.FC = () => {
   const [expandedTokenIds, setExpandedTokenIds] = useState<Set<string>>(new Set());
   const [prevTokenCount, setPrevTokenCount] = useState(tokens.length);
 
-  // Determine grid columns based on card size - MOBILE OPTIMIZED (2 cols on mobile)
+  // Determine grid columns based on card size - DESKTOP 5 COLS MAX
   const gridCols = {
-    small: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7',
-    medium: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5',
-    large: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4',
+    small: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5',
+    medium: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4',
+    large: 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3',
   }[cardSize];
 
   // Group tokens if auto-stack is enabled
@@ -127,6 +129,8 @@ export const TokenGrid: React.FC = () => {
                 onRemoveCustomCounter={(type) => removeCustomCounter(token.id, type)}
                 onSetCounterAmount={(type, amt) => setCounterAmount(token.id, type, amt)}
                 onUpdateCounterIcon={(type, icon) => updateCounterIcon(token.id, type, icon)}
+                onAddAttachment={(id, attachment) => addAttachment(id, attachment)}
+                onRemoveAttachment={(id, name) => removeAttachment(id, name)}
                 onDelete={() => {
                   console.log('TokenGrid onDelete called for:', token.name);
                   if (window.confirm(`Move ${token.name} to graveyard?`)) {
@@ -166,6 +170,13 @@ export const TokenGrid: React.FC = () => {
                     if (t.hasSummoningSickness) removeSummoningSickness(t.id);
                   });
                 }}
+                onRemoveAttachment={(id, name) => removeAttachment(id, name)}
+                onAddAttachmentToAll={(attachment) => {
+                  // Add attachment to all tokens in this group
+                  group.tokens.forEach(t => {
+                    addAttachment(t.id, attachment);
+                  });
+                }}
               />
               </div>
             );
@@ -192,6 +203,8 @@ export const TokenGrid: React.FC = () => {
           onRemoveCustomCounter={removeCustomCounter}
           onSetCounterAmount={setCounterAmount}
           onUpdateCounterIcon={updateCounterIcon}
+          onAddAttachment={addAttachment}
+          onRemoveAttachment={removeAttachment}
           onDelete={(id) => {
             const token = tokens.find(t => t.id === id);
             moveToGraveyard(id);

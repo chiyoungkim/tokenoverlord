@@ -2,7 +2,9 @@ import { useState, useRef } from 'react';
 import type { Token } from '../types/token';
 import { getColorGradient, getColorBorder, isLightColor } from '../utils/colors';
 import { TokenTooltip } from './TokenTooltip';
+import { AttachmentManager } from './AttachmentManager';
 import { parseManaSymbols } from '../utils/manaSymbols';
+import { Paperclip } from 'lucide-react';
 
 interface StackedTokenCardProps {
   token: Token;
@@ -12,6 +14,8 @@ interface StackedTokenCardProps {
   onTapAll: () => void;
   onUntapAll: () => void;
   onRemoveSummoningSicknessAll: () => void;
+  onRemoveAttachment: (tokenId: string, attachmentName: string) => void;
+  onAddAttachmentToAll: (attachment: import('../types/token').Attachment) => void;
 }
 
 export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
@@ -22,9 +26,13 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
   onTapAll,
   onUntapAll,
   onRemoveSummoningSicknessAll,
+  onRemoveAttachment,
+  onAddAttachmentToAll,
 }) => {
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  const [tooltipDismissed, setTooltipDismissed] = useState(false);
+  const [attachmentManagerOpen, setAttachmentManagerOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const tooltipTimeout = useRef<number | null>(null);
   
@@ -38,7 +46,9 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
         height: rect.height,
       });
     }
-    tooltipTimeout.current = setTimeout(() => setTooltipVisible(true), 500);
+    if (!tooltipDismissed) {
+      tooltipTimeout.current = setTimeout(() => setTooltipVisible(true), 500);
+    }
   };
 
   const handleMouseLeave = () => {
@@ -46,6 +56,7 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
       clearTimeout(tooltipTimeout.current);
     }
     setTooltipVisible(false);
+    setTooltipDismissed(false);
   };
   const isCreature = token.power !== null && token.toughness !== null;
   const useDarkText = isLightColor(token.colors);
@@ -62,12 +73,20 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
   
   return (
     <div 
-      className="relative" 
+      className="relative group" 
       ref={cardRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <TokenTooltip token={token} visible={tooltipVisible} position={tooltipPosition} />
+      <TokenTooltip 
+        token={token} 
+        visible={tooltipVisible} 
+        position={tooltipPosition}
+        onDismiss={() => {
+          setTooltipVisible(false);
+          setTooltipDismissed(true);
+        }}
+      />
       
       {/* Stacked card effect - bottom layers (only show when untapped) */}
       {!token.isTapped && (
@@ -205,6 +224,22 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
               </div>
             )}
 
+            {/* Attachments Display */}
+            {token.attachments && token.attachments.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 justify-center max-w-full">
+                {token.attachments.map((attachment, idx) => (
+                  <div
+                    key={`${attachment.name}-${idx}`}
+                    className="bg-gradient-to-br from-amber-500 to-amber-600 text-white text-xs font-bold rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-lg border-2 border-amber-200 ring-2 ring-amber-400/30"
+                    title={attachment.effect || attachment.name}
+                  >
+                    <Paperclip size={12} />
+                    <span className="max-w-[100px] truncate">{attachment.name}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Abilities or Background P/T */}
             {token.abilities && !isCreature ? (
               <div className={`text-xs text-center ${useDarkText ? 'text-gray-900' : 'text-white'} bg-white bg-opacity-80 p-2 rounded max-h-full overflow-hidden break-words line-clamp-4`}>
@@ -226,7 +261,28 @@ export const StackedTokenCard: React.FC<StackedTokenCardProps> = ({
             {currentPower}/{currentToughness}
           </div>
         )}
+
+        {/* Attachment Button - Bottom left, always visible */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setAttachmentManagerOpen(true);
+          }}
+          className="absolute bottom-2 left-2 p-1.5 bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 active:scale-95 text-white rounded-full shadow-xl transition-all duration-200 z-20 opacity-0 group-hover:opacity-100"
+          title="Manage attachments for all"
+        >
+          <Paperclip size={14} />
+        </button>
       </div>
+
+      {/* Attachment Manager Modal */}
+      <AttachmentManager
+        token={token}
+        isOpen={attachmentManagerOpen}
+        onClose={() => setAttachmentManagerOpen(false)}
+        onAddAttachment={(attachment) => onAddAttachmentToAll(attachment)}
+        onRemoveAttachment={(name) => onRemoveAttachment(token.id, name)}
+      />
     </div>
   );
 };

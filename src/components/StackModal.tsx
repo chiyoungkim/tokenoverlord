@@ -22,6 +22,8 @@ interface StackModalProps {
   onRemoveCustomCounter: (id: string, type: string) => void;
   onSetCounterAmount: (id: string, type: string, amount: number) => void;
   onUpdateCounterIcon: (id: string, type: string, icon: string) => void;
+  onAddAttachment: (id: string, attachment: import('../types/token').Attachment) => void;
+  onRemoveAttachment: (id: string, name: string) => void;
 }
 
 export const StackModal: React.FC<StackModalProps> = ({
@@ -42,6 +44,8 @@ export const StackModal: React.FC<StackModalProps> = ({
   onRemoveCustomCounter,
   onSetCounterAmount,
   onUpdateCounterIcon,
+  onAddAttachment,
+  onRemoveAttachment,
 }) => {
   const [splitCount, setSplitCount] = useState('');
   const [counterCount, setCounterCount] = useState('');
@@ -329,6 +333,8 @@ export const StackModal: React.FC<StackModalProps> = ({
                   onRemoveCustomCounter={(type) => onRemoveCustomCounter(token.id, type)}
                   onSetCounterAmount={(type, amt) => onSetCounterAmount(token.id, type, amt)}
                   onUpdateCounterIcon={(type, icon) => onUpdateCounterIcon(token.id, type, icon)}
+                  onAddAttachment={(id, attachment) => onAddAttachment(id, attachment)}
+                  onRemoveAttachment={(id, name) => onRemoveAttachment(id, name)}
                   onDelete={() => {
                     if (window.confirm(`Move ${token.name} to graveyard?`)) {
                       onDelete(token.id);
